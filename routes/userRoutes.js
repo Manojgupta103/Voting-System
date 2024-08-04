@@ -72,56 +72,34 @@ router.get('/profile', jwtAuthMiddleware, async (req, res) => {
     }
 })
 
-// GET method to get the person
-router.get('/', jwtAuthMiddleware, async (req, res) =>{
+
+router.put('/profile/password', jwtAuthMiddleware, async (req, res)=>{
     try{
-        const data = await Person.find();
-        console.log('data fetched');
-        res.status(200).json(data);
-    }catch(err){
-        console.log(err);
-        res.status(500).json({error: 'Internal Server Error'});
-    }
-})
+        const userId = req.user.id; // Extract the id from the URL token
+        const { currentPassword, newPassword } = req.body; // Extract current and new passwords from request body        
 
-router.put('/:id', async (req, res)=>{
-    try{
-        const personId = req.params.id; // Extract the id from the URL parameter
-        const updatedPersonData = req.body; // Updated data for the person
-
-        const response = await Person.findByIdAndUpdate(personId, updatedPersonData, {
-            new: true, // Return the updated document
-            runValidators: true, // Run Mongoose validation
-        })
-
-        if (!response) {
-            return res.status(404).json({ error: 'Person not found' });
+        // Check if currentPassword and newPassword are present in the request body
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Both currentPassword and newPassword are required' });
+            
+        }
+        // If user does not exist or password does not match, return error
+        if (!user || !(await user.comparePassword(currentPassword))) {
+            return res.status(401).json({ error: 'Invalid current password' });
         }
 
-        console.log('data updated');
-        res.status(200).json(response);
+        // Update the user's password
+        user.password = newPassword;
+        await user.save();
+
+        console.log('password updated');
+        res.status(200).json({ message: 'Password updated' });
     }catch(err){
         console.log(err);
         res.status(500).json({error: 'Internal Server Error'});
     }
 })
 
-router.delete('/:id', async (req, res) => {
-    try{
-        const personId = req.params.id; // Extract the person's ID from the URL parameter
-        
-        // Assuming you have a Person model
-        const response = await Person.findByIdAndRemove(personId);
-        if (!response) {
-            return res.status(404).json({ error: 'Person not found' });
-        }
-        console.log('data delete');
-        res.status(200).json({message: 'person Deleted Successfully'});
-    }catch(err){
-        console.log(err);
-        res.status(500).json({error: 'Internal Server Error'});
-    }
-})
 
 
 module.exports = router;
