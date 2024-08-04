@@ -84,8 +84,6 @@ router.get('/', jwtAuthMiddleware, async (req, res) =>{
     }
 })
 
-
-
 router.put('/:id', async (req, res)=>{
     try{
         const personId = req.params.id; // Extract the id from the URL parameter
