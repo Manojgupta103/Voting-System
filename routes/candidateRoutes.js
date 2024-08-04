@@ -34,23 +34,23 @@ router.post('/', jwtAuthMiddleware, async (req, res) => {
 });
 
 // PUT route to update a candidate
-router.put('/:candidateID', jwtAuthMiddleware, async (req, res) => {
-    try {
-        if (!(await checkAdminRole(req.user.id))) {
-            return res.status(403).json({ message: 'User does not have admin role' });
-        }
+router.put('/:candidateID', jwtAuthMiddleware, async (req, res)=>{
+    try{
+        if(!checkAdminRole(req.user.id))
+            return res.status(403).json({message: 'user does not have admin role'});
+        
+        const candidateID = req.params.candidateID; // Extract the id from the URL parameter
+        const updatedCandidateData = req.body; // Updated data for the person
 
-        const candidateID = req.params.candidateID;
-        if (!mongoose.Types.ObjectId.isValid(candidateID)) {
-            return res.status(400).json({ message: 'Invalid candidate ID' });
-        }
-
-        const updatedCandidateData = req.body;
         const response = await Candidate.findByIdAndUpdate(candidateID, updatedCandidateData, {
-            new: true,
-            runValidators: true,
-        });
+            new: true, // Return the updated document
+            runValidators: true, // Run Mongoose validation
+        })
 
+        if (!response) {
+            return res.status(404).json({ error: 'Candidate not found' });
+        }
+        
         if (!response) {
             return res.status(404).json({ error: 'Candidate not found' });
         }
