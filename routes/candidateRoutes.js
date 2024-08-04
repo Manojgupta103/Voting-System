@@ -5,7 +5,6 @@ const {jwtAuthMiddleware, generateToken} = require('../jwt');
 const Candidate = require('../models/candidate');
 
 
-
 const checkAdminRole = async (userID) => {
    try{
         const user = await User.findById(userID);
@@ -144,7 +143,6 @@ router.get('/vote/count', async (req, res) => {
         return res.status(200).json(voteRecord);
     }catch(err){
         console.log(err);
-        console.error("Error fetching vote counts: ", err.message);
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
